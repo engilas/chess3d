@@ -10,11 +10,20 @@ namespace Assets.Scripts.Models
     {
         public readonly int Col;
         public readonly int Row;
+        public readonly int Pos;
         
         public Position(int col, int row)
         {
             Row = row;
             Col = col;
+            Pos = row * 8 + col;
+        }
+
+        public Position(int pos)
+        {
+            Row = pos / 8;
+            Col = pos % 8;
+            Pos = pos;
         }
 
         public override string ToString()

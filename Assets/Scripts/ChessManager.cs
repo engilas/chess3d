@@ -1,44 +1,33 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using Assets.Scripts;
 using Assets.Scripts.Models;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Networking;
-using ChessEngine;
 using ChessEngine.Engine;
 
-public class ChessManager : MonoBehaviour {
+public class ChessManager : MonoBehaviour
+{
 
-	// Use this for initialization
-    private Board _board = new Board();
+    private Board _board;
 
-    private PieceComponent _selectedPiece;
+    private Piece _selectedPiece;
     private Engine _engine = new Engine();
     private bool _playerLock = false;
     private bool _gameOver = false;
-    private PieceColor _playerColor = PieceColor.White;
+    private ChessPieceColor _playerColor = ChessPieceColor.White;
 
-	void Start ()
+    void Start()
     {
-        //_engine.
         _engine.NewGame();
         _engine.PlyDepthSearched = 1;
-        var pieces = BoardLoader.FillBoard(_board);
-        foreach (var piece in pieces)
-        {
-            var path = string.Format("Assets/Prefabs/{0}{1}.prefab", piece.Type.ToString(),
-                piece.Color == PieceColor.Black ? "Dark" : "Light");
-            var prefab = AssetDatabase.LoadAssetAtPath(path, typeof(PieceComponent));
-            var pieceComp = Instantiate(prefab) as PieceComponent;
-            pieceComp.SetPiece(piece);
-        }
+        var pieces = BoardLoader.FillBoard(_engine);
+        _board = new Board(pieces);
 
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update()
+    {
         if (!_gameOver && !_playerLock && Input.GetMouseButtonDown(0))
         {
             if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out var hitInfo)) return;
@@ -47,15 +36,17 @@ public class ChessManager : MonoBehaviour {
 
             if (hitInfo.transform.tag == "Piece")
             {
-                var piece = hitInfo.transform.gameObject.GetComponent<PieceComponent>();
-                if (piece.Piece.Color == _playerColor)
+                var piece = hitInfo.transform.gameObject.GetComponent<Piece>();
+                if (piece.Color == _playerColor)
                 {
                     _selectedPiece = piece;
                     return;
                 }
+
                 if (_selectedPiece != null)
-                    enemyHit = piece.Piece;
+                    enemyHit = piece;
             }
+
             if (enemyHit != null || hitInfo.transform.tag == "Board")
             {
                 if (_selectedPiece != null)
@@ -63,16 +54,17 @@ public class ChessManager : MonoBehaviour {
                     var col = enemyHit?.Position.Col ?? Mathf.RoundToInt(hitInfo.point.x);
                     var row = enemyHit?.Position.Row ?? Mathf.RoundToInt(hitInfo.point.z);
 
-                    var piecePos = _selectedPiece.Piece.Position;
+                    var piecePos = _selectedPiece.Position;
 
-                    if (_engine.IsValidMove((byte) piecePos.Col, (byte) (7 - piecePos.Row), (byte) col,
-                        (byte) (7 - row))
+                    if (_engine.IsValidMove((byte) piecePos.Col, (byte) piecePos.Row, (byte) col,
+                            (byte) row)
                         &&
-                        _engine.MovePiece((byte) piecePos.Col, (byte) (7 - piecePos.Row), (byte) col,
-                        (byte) (7 - row)))
+                        _engine.MovePiece((byte) piecePos.Col, (byte) piecePos.Row, (byte) col,
+                            (byte) row))
                     {
                         _playerLock = true;
-                        ProcessMove();
+                        //ProcessMove();
+                        _board.Move(_engine.LastMove);
                         if (CheckEndGame())
                         {
                             _gameOver = true;
@@ -87,8 +79,9 @@ public class ChessManager : MonoBehaviour {
                         _playerLock = false;
                         Debug.Log("Invalid move");
                     }
+
                     _selectedPiece = null;
-                    
+
                     //CheckEndGame();
                 }
             }
@@ -96,24 +89,6 @@ public class ChessManager : MonoBehaviour {
             {
                 _selectedPiece = null;
             }
-
-
-            //var board =
-            //if (hitInfo.transform.gameObject.GetComponent<PieceComponent>() )
-        } 
-	}
-
-    void ProcessMove()
-    {
-        var lastMove = _engine.GetMoveHistory().ToArray()[0];
-        if (lastMove.TakenPiece.PieceType != ChessPieceType.None)
-        {
-            _board.Destroy(GetPosition(lastMove.TakenPiece.Position));
-        }
-        _board.Move(GetPosition(lastMove.MovingPiecePrimary.SrcPosition), GetPosition(lastMove.MovingPiecePrimary.DstPosition));
-        if (lastMove.MovingPieceSecondary.PieceType != ChessPieceType.None)
-        {
-            _board.Move(GetPosition(lastMove.MovingPieceSecondary.SrcPosition), GetPosition(lastMove.MovingPieceSecondary.DstPosition));
         }
     }
 
@@ -126,7 +101,7 @@ public class ChessManager : MonoBehaviour {
         if (_engine.Thinking)
             throw new Exception("Still thinking");
 
-        ProcessMove();
+        _board.Move(_engine.LastMove);
 
         if (CheckEndGame())
         {
@@ -136,11 +111,6 @@ public class ChessManager : MonoBehaviour {
         {
             _playerLock = false;
         }
-    }
-
-    Position GetPosition(byte enginePos)
-    {
-        return new Position(enginePos % 8, 7 - enginePos / 8);
     }
 
     bool CheckEndGame()
@@ -163,6 +133,7 @@ public class ChessManager : MonoBehaviour {
             {
                 Debug.Log("1/2-1/2 {Stalemate}");
             }
+
             //_engine.NewGame();
             return true;
         }

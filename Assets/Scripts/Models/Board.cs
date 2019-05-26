@@ -2,67 +2,62 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ChessEngine.Engine;
 
 namespace Assets.Scripts.Models
 {
     public class Board
     {
-        private Piece[,] _board;
-        private int _destroyXOffset = 0;
+        private Piece[] _board = new Piece[64];
+        private int _destroyXOffset = 7;
 
-        public Board()
+        public Board(IEnumerable<Piece> pieces)
         {
-            _board = new Piece[8, 8];
-        }
-
-        public void Move(Piece p, Position pos)
-        {
-            var old = p.Position;
-            if (_board[old.Col, old.Row] != p)
-                throw new ArgumentException("Position mismatch");
-            if (_board[pos.Col, pos.Row] != null)
-                throw new ArgumentException(string.Format("Position {0} occupied", pos.ToString()));
-            _board[old.Col, old.Row] = null;
-            _board[pos.Col, pos.Row] = p;
-            p.SetPosition(pos);
-        }
-
-        public void Move(Position src, Position dst)
-        {
-            //Move();
-            var p = _board[src.Col, src.Row];
-            if (p == null)
+            foreach (var piece in pieces)
             {
-                throw new ArgumentException($"Src pos {src} is empty");
+                _board[piece.Position.Pos] = piece;
             }
-            Move(p, dst);
         }
 
-        public void Create(Piece p, Position pos)
+        public void Move(MoveContent move)
         {
-            if (_board[pos.Col, pos.Row] != null)
-                throw new ArgumentException(string.Format("Position {0} occupied", pos.ToString()));
-            _board[pos.Col, pos.Row] = p;
-            p.SetPosition(pos);
-        }
-
-        public void Destroy(Position pos)
-        {
-            var p = _board[pos.Col, pos.Row];
-            if (p == null)
+            if (move.TakenPiece.PieceType != ChessPieceType.None)
             {
-                throw new ArgumentException($"Src pos {pos} is empty");
+                Destroy(move.TakenPiece.Position);
             }
-            Destroy(p);
+            Move(move.MovingPiecePrimary);
+            if (move.MovingPieceSecondary.PieceType != ChessPieceType.None)
+            {
+                Move(move.MovingPieceSecondary);
+            }
         }
 
-        public void Destroy(Piece p)
+        public void Move(PieceMoving pieceMoving)
         {
-            var old = p.Position;
-            if (_board[old.Col, old.Row] != p)
-                throw new ArgumentException("Position mismatch");
-            _board[old.Col, old.Row] = null;
-            p.SetPosition(new Position(_destroyXOffset++, -1));
+            Move(pieceMoving.SrcPosition, pieceMoving.DstPosition);
+        }
+
+        public void Move(byte src, byte dst)
+        {
+            var piece = GetPiece(src);
+            _board[src] = null;
+            _board[dst] = piece;
+            piece.SetPosition(new Position(dst));
+        }
+
+        public void Destroy(byte src)
+        {
+            var piece = GetPiece(src);
+            _board[src] = null;
+            piece.SetPosition(new Position(_destroyXOffset++, 8));
+        }
+
+        private Piece GetPiece(byte pos)
+        {
+            var piece = _board[pos];
+            if (piece == null)
+                throw new ArgumentException($"Piece {pos} not found");
+            return piece;
         }
     }
 }
