@@ -19,7 +19,7 @@ public class ChessManager : MonoBehaviour
     void Start()
     {
         _engine.NewGame();
-        _engine.PlyDepthSearched = 1;
+        _engine.PlyDepthSearched = 4;
         var pieces = BoardLoader.FillBoard(_engine);
         _board = new Board(pieces);
 

@@ -20,11 +20,11 @@ namespace Assets.Scripts
             Color = color;
         }
 
-        public void SetPosition(Position p)
+        public void SetPosition(Position p, bool taken = false)
         {
             Position = p;
 
-            transform.position = new Vector3(p.Col, 0, p.Row);
+            transform.position = new Vector3(p.Col, taken ? -0.5f : 0f, p.Row);
 
             OnPositionChange?.Invoke(p);
         }

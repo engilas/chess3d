@@ -9,7 +9,8 @@ namespace Assets.Scripts.Models
     public class Board
     {
         private Piece[] _board = new Piece[64];
-        private int _destroyXOffset = 7;
+        private int _blackTaken = 0;
+        private int _whiteTaken = 0;
 
         public Board(IEnumerable<Piece> pieces)
         {
@@ -49,7 +50,15 @@ namespace Assets.Scripts.Models
         {
             var piece = GetPiece(src);
             _board[src] = null;
-            piece.SetPosition(new Position(_destroyXOffset++, 8));
+            ref var count = ref piece.Color == ChessPieceColor.White ? ref _whiteTaken : ref _blackTaken;
+            var col = count / 8;
+            var row = count % 8;
+            if (piece.Color == ChessPieceColor.Black)
+                col = - 2 - col;
+            else
+                col = 9 + col;
+            piece.SetPosition(new Position(col, row), true);
+            ++count;
         }
 
         private Piece GetPiece(byte pos)
