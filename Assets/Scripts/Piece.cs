@@ -14,12 +14,16 @@ namespace Assets.Scripts
         public ChessPieceColor Color { get; private set; }
         public Position Position { get; private set; }
 
-        private float _highlight = 60/255f;
+        public float SelectOffset = 0.5f;
+        
+        private float _highlightIntensity = 60/255f;
         private Color _highlightColor;
+
+        private bool _selected;
 
         private void Awake()
         {
-            _highlightColor = new Color(_highlight,_highlight,_highlight);
+            _highlightColor = new Color(_highlightIntensity,_highlightIntensity,_highlightIntensity);
         }
 
         public void SetType(ChessPieceType type, ChessPieceColor color)
@@ -32,9 +36,24 @@ namespace Assets.Scripts
         {
             Position = p;
 
+            Deselect();
             transform.position = new Vector3(p.Col, taken ? -0.5f : 0f, p.Row);
 
             OnPositionChange?.Invoke(p);
+        }
+
+        public void Select()
+        {
+            if (!_selected)
+                transform.position += new Vector3(0, SelectOffset, 0);
+            _selected = true;
+        }
+
+        public void Deselect()
+        {
+            if (_selected)
+                transform.position -= new Vector3(0, SelectOffset, 0);
+            _selected = false;
         }
 
         public event Action<Position?> OnPositionChange;
