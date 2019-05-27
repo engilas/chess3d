@@ -14,6 +14,14 @@ namespace Assets.Scripts
         public ChessPieceColor Color { get; private set; }
         public Position Position { get; private set; }
 
+        private float _highlight = 60/255f;
+        private Color _highlightColor;
+
+        private void Awake()
+        {
+            _highlightColor = new Color(_highlight,_highlight,_highlight);
+        }
+
         public void SetType(ChessPieceType type, ChessPieceColor color)
         {
             Type = type;
@@ -30,5 +38,15 @@ namespace Assets.Scripts
         }
 
         public event Action<Position?> OnPositionChange;
+
+        private void OnMouseEnter()
+        {
+            gameObject.GetComponent<Renderer>().material.color += _highlightColor;
+        }
+
+        private void OnMouseExit()
+        {
+            gameObject.GetComponent<Renderer>().material.color -= _highlightColor;
+        }
     }
 }
