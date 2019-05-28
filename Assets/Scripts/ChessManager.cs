@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Threading;
 using Assets.Scripts;
 using Assets.Scripts.Models;
 using UnityEngine;
@@ -17,6 +18,10 @@ public class ChessManager : MonoBehaviour
     private bool _playerLock = false;
     private bool _gameOver = false;
     private ChessPieceColor _playerColor = ChessPieceColor.White;
+    private Thread _aiThread;
+
+    private Semaphore _signal = new Semaphore(0, 1);
+    private volatile bool _aiThinking;
 
     void Start()
     {
@@ -24,7 +29,17 @@ public class ChessManager : MonoBehaviour
         _engine.PlyDepthSearched = 4;
         var pieces = BoardLoader.FillBoard(_engine);
         _board = new Board(pieces);
+        _aiThread = new Thread(AiAction);
+        _aiThread.Start();
+    }
 
+    void AiAction()
+    {
+        while (_signal.WaitOne())
+        {
+            _engine.AiPonderMove();
+            _aiThinking = false;
+        }
     }
 
     void DeselectPiece()
@@ -110,13 +125,11 @@ public class ChessManager : MonoBehaviour
 
     IEnumerator EngineMove()
     {
-        var job = new EngineMoveJob();
-        var handle = job.Schedule();
-        
-        while (!handle.IsCompleted)
+        StartAI();
+
+        while (_aiThinking)
             yield return null;
-        //yield return null;
-        handle.Complete();
+        
         _board.Move(_engine.LastMove);
 
         if (CheckEndGame())
@@ -129,26 +142,11 @@ public class ChessManager : MonoBehaviour
         }
     }
 
-    //IEnumerator EngineMove()
-    //{
-    //    //DateTime start = DateTime.Now;
-
-    //    yield return null;
-    //    _engine.AiPonderMove();
-    //    if (_engine.Thinking)
-    //        throw new Exception("Still thinking");
-
-    //    _board.Move(_engine.LastMove);
-
-    //    if (CheckEndGame())
-    //    {
-    //        _gameOver = true;
-    //    }
-    //    else
-    //    {
-    //        _playerLock = false;
-    //    }
-    //}
+    void StartAI()
+    {
+        _aiThinking = true;
+        _signal.Release();
+    }
 
     bool CheckEndGame()
     {
