@@ -18,10 +18,7 @@ public class ChessManager : MonoBehaviour
     private bool _playerLock = false;
     private bool _gameOver = false;
     private ChessPieceColor _playerColor = ChessPieceColor.White;
-    private Thread _aiThread;
-
-    private Semaphore _signal = new Semaphore(0, 1);
-    private volatile bool _aiThinking;
+    private EngineMoveJob _engineMoveJob;
 
     void Start()
     {
@@ -29,18 +26,10 @@ public class ChessManager : MonoBehaviour
         _engine.PlyDepthSearched = 4;
         var pieces = BoardLoader.FillBoard(_engine);
         _board = new Board(pieces);
-        _aiThread = new Thread(AiAction);
-        _aiThread.Start();
+        _engineMoveJob = new EngineMoveJob(_engine);
     }
 
-    void AiAction()
-    {
-        while (_signal.WaitOne())
-        {
-            _engine.AiPonderMove();
-            _aiThinking = false;
-        }
-    }
+    
 
     void DeselectPiece()
     {
@@ -125,9 +114,9 @@ public class ChessManager : MonoBehaviour
 
     IEnumerator EngineMove()
     {
-        StartAI();
+        _engineMoveJob.Start();
 
-        while (_aiThinking)
+        while (!_engineMoveJob.IsCompleted)
             yield return null;
         
         _board.Move(_engine.LastMove);
@@ -140,12 +129,6 @@ public class ChessManager : MonoBehaviour
         {
             _playerLock = false;
         }
-    }
-
-    void StartAI()
-    {
-        _aiThinking = true;
-        _signal.Release();
     }
 
     bool CheckEndGame()
