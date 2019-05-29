@@ -117,6 +117,7 @@ public class ChessManager : MonoBehaviour
 
     IEnumerator EngineMove()
     {
+        yield return null;
         _engineMoveJob.Start();
 
         while (!_engineMoveJob.IsCompleted)
