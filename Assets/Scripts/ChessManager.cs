@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections;
-using System.Threading;
 using Assets.Scripts;
 using Assets.Scripts.Models;
 using UnityEngine;
 using ChessEngine.Engine;
-using Unity.Collections;
-using Unity.Jobs;
 
 public class ChessManager : MonoBehaviour
 {
@@ -19,6 +16,7 @@ public class ChessManager : MonoBehaviour
     private bool _gameOver = false;
     private ChessPieceColor _playerColor = ChessPieceColor.White;
     private EngineMoveJob _engineMoveJob;
+    private PlatformManager _platformManager;
 
     void Start()
     {
@@ -27,14 +25,22 @@ public class ChessManager : MonoBehaviour
         var pieces = BoardLoader.FillBoard(_engine);
         _board = new Board(pieces);
         _engineMoveJob = new EngineMoveJob(_engine);
+        _platformManager = new PlatformManager(_engine);
     }
-
     
-
     void DeselectPiece()
     {
+        _platformManager.Clear();
         _selectedPiece?.Deselect();
         _selectedPiece = null;
+    }
+
+    void SelectPiece(Piece p)
+    {
+        DeselectPiece();
+        _selectedPiece = p;
+        _selectedPiece.Select();
+        _platformManager.DrawValidMoves(p.Position);
     }
 
     // Update is called once per frame
@@ -61,9 +67,7 @@ public class ChessManager : MonoBehaviour
                     }
                     else
                     {
-                        _selectedPiece?.Deselect();
-                        _selectedPiece = piece;
-                        _selectedPiece.Select();
+                        SelectPiece(piece);
                     }
                     return;
                 }
@@ -104,11 +108,10 @@ public class ChessManager : MonoBehaviour
                         _playerLock = false;
                         Debug.Log("Invalid move");
                     }
-                    //CheckEndGame();
+                    //CheckEndGame();//todo нужно ли?
                 }
             }
-            _selectedPiece?.Deselect();
-            _selectedPiece = null;
+            DeselectPiece();
         }
     }
 
