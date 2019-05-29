@@ -10,9 +10,10 @@ public class BoardLoader {
 
     private static Piece Create(ChessPieceType type, ChessPieceColor color)
     {
-        var path = $"Assets/Prefabs/{type.ToString()}{(color == ChessPieceColor.Black ? "Dark" : "Light")}.prefab";
-        var prefab = AssetDatabase.LoadAssetAtPath(path, typeof(Piece));
-        var piece = Object.Instantiate(prefab) as Piece;
+        var path = $"Prefabs/{type.ToString()}{(color == ChessPieceColor.Black ? "Dark" : "Light")}";
+        var prefab = Resources.Load(path);
+        var obj = Object.Instantiate(prefab) as GameObject;
+        var piece = obj.GetComponent<Piece>();
         piece.SetType(type, color);
         return piece;
     }

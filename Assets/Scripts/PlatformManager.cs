@@ -21,7 +21,7 @@ namespace Assets.Scripts
         {
             _engine = engine;
 
-            _platformPrefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/platform.prefab", typeof(GameObject));
+            _platformPrefab = Resources.Load("Prefabs/platform");
         }
 
         public void DrawValidMoves(Position pos)
