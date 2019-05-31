@@ -37,4 +37,11 @@ public class BoardLoader {
 
         return result.ToArray();
     }
+
+    public static Piece ReplacePiece(Piece p, ChessPieceType newType)
+    {
+        var newPiece = Create(newType, p.Color);
+        Object.Destroy(p.gameObject);
+        return newPiece;
+    }
 }

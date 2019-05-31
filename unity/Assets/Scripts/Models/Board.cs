@@ -31,14 +31,21 @@ namespace Assets.Scripts.Models
             {
                 Move(move.MovingPieceSecondary);
             }
+
+            if (move.PawnPromotedTo != ChessPieceType.None)
+            {
+                ref var pos = ref _board[move.MovingPiecePrimary.DstPosition];
+                pos = BoardLoader.ReplacePiece(pos, move.PawnPromotedTo);
+                pos.SetPosition(new Position(move.MovingPiecePrimary.DstPosition));
+            }
         }
 
-        public void Move(PieceMoving pieceMoving)
+        private void Move(PieceMoving pieceMoving)
         {
             Move(pieceMoving.SrcPosition, pieceMoving.DstPosition);
         }
 
-        public void Move(byte src, byte dst)
+        private void Move(byte src, byte dst)
         {
             var piece = GetPiece(src);
             _board[src] = null;
@@ -46,7 +53,7 @@ namespace Assets.Scripts.Models
             piece.SetPosition(new Position(dst));
         }
 
-        public void Destroy(byte src)
+        private void Destroy(byte src)
         {
             var piece = GetPiece(src);
             _board[src] = null;

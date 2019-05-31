@@ -35,7 +35,6 @@ namespace Assets.Scripts
         {
             _engine = engine;
             _mode = Application.platform == RuntimePlatform.WebGLPlayer ? EngineMoveMode.Job : EngineMoveMode.Thread;
-            //_mode = EngineMoveMode.Job;
 
             if (_mode == EngineMoveMode.Thread)
             {
@@ -43,11 +42,6 @@ namespace Assets.Scripts
                 _aiThread = new Thread(AiAction);
                 _aiThread.Start();
             }
-            if (_mode == EngineMoveMode.Job)
-            {
-                
-            }
-            
         }
 
         private void AiAction()
