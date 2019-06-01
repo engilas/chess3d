@@ -18,14 +18,17 @@ public class ChessManager : MonoBehaviour
     private EngineMoveJob _engineMoveJob;
     private PlatformManager _platformManager;
 
+    private Piece[] _allPieces;
+
+    [SerializeField] private UIManager uiManager;
+
     void Start()
     {
-        _engine.NewGame();
-        _engine.PlyDepthSearched = 4;
-        var pieces = BoardLoader.FillBoard(_engine);
-        _board = new Board(pieces);
+        StartGame();
         _engineMoveJob = new EngineMoveJob(_engine);
         _platformManager = new PlatformManager(_engine);
+        uiManager.OnRestartClick += () => Restart();
+
     }
     
     void DeselectPiece()
@@ -92,13 +95,8 @@ public class ChessManager : MonoBehaviour
                             (byte) row))
                     {
                         _playerLock = true;
-                        //ProcessMove();
                         _board.Move(_engine.LastMove);
-                        if (CheckEndGame())
-                        {
-                            _gameOver = true;
-                        }
-                        else
+                        if (!CheckEndGame())
                         {
                             StartCoroutine(EngineMove());
                         }
@@ -125,51 +123,39 @@ public class ChessManager : MonoBehaviour
         
         _board.Move(_engine.LastMove);
 
-        if (CheckEndGame())
-        {
-            _gameOver = true;
-        }
-        else
-        {
-            _playerLock = false;
-        }
+        CheckEndGame();
+        _playerLock = false;
     }
 
     bool CheckEndGame()
     {
+        string reason = null;
         if (_engine.StaleMate)
         {
             if (_engine.InsufficientMaterial)
             {
-                Debug.Log("1/2-1/2 {Draw by insufficient material}");
+                reason = "Draw by insufficient material";
             }
             else if (_engine.RepeatedMove)
             {
-                Debug.Log("1/2-1/2 {Draw by repetition}");
+                reason = "Draw by repetition";
             }
             else if (_engine.FiftyMove)
             {
-                Debug.Log("1/2-1/2 {Draw by fifty move rule}");
+                reason = "Draw by fifty move rule";
             }
             else
             {
-                Debug.Log("1/2-1/2 {Stalemate}");
+                reason = "Stalemate";
             }
-
-            //_engine.NewGame();
-            return true;
         }
         else if (_engine.GetWhiteMate())
         {
-            Debug.Log("0-1 {Black mates}");
-            //_engine.NewGame();
-            return true;
+            reason = "Black mates";
         }
         else if (_engine.GetBlackMate())
         {
-            Debug.Log("1-0 {White mates}");
-            //_engine.NewGame();
-            return true;
+            reason = "White mates";
         }
 
         if (_engine.GetBlackCheck())
@@ -182,6 +168,29 @@ public class ChessManager : MonoBehaviour
             Debug.Log("White check");
         }
 
+        if (reason != null)
+        {
+            _gameOver = true;
+            uiManager.ShowGameOver(reason);
+            return true;
+        }
         return false;
+    }
+
+    private void StartGame()
+    {
+        _engine.NewGame();
+        _engine.PlyDepthSearched = 4;
+        _allPieces = BoardLoader.FillBoard(_engine);
+        _board = new Board(_allPieces);
+    }
+
+    private void Restart()
+    {
+        foreach (var p in _allPieces)
+            Destroy(p.gameObject);
+        _gameOver = false;
+        _playerLock = false;
+        StartGame();
     }
 }
