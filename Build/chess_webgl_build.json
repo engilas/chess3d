@@ -1,0 +1,16 @@
+{
+"companyName": "DefaultCompany",
+"productName": "chess3d",
+"productVersion": "1.0",
+"dataUrl": "chess_webgl_build.data.unityweb",
+"wasmCodeUrl": "chess_webgl_build.wasm.code.unityweb",
+"wasmFrameworkUrl": "chess_webgl_build.wasm.framework.unityweb",
+"graphicsAPI": ["WebGL 2.0","WebGL 1.0"],
+"webglContextAttributes": {"preserveDrawingBuffer": false},
+"splashScreenStyle": "Dark",
+"backgroundColor": "#231F20",
+"cacheControl": {"default": "must-revalidate"},
+"developmentBuild": false,
+"multithreading": false,
+"unityVersion": "2019.1.3f1"
+}
