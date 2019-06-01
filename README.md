@@ -1,4 +1,4 @@
 # Chess 3d
 Chess 3d with unity
 
-Play demo (WebGL) https://engilas.github.io/chess3d/
+<a href="https://engilas.github.io/chess3d/" target="_blank">Play demo (WebGL)</a>
