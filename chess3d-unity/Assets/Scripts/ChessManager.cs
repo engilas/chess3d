@@ -49,6 +49,8 @@ public class ChessManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (uiManager.IsMenuActive) return;
+
         if (!_gameOver && !_playerLock && Input.GetMouseButtonDown(0))
         {
             if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out var hitInfo)) 

@@ -21,7 +21,7 @@ namespace Assets.Scripts
 
         private bool _selected;
 
-        private void Awake()
+        private void Start()
         {
             _highlightColor = new Color(_highlightIntensity,_highlightIntensity,_highlightIntensity);
         }
