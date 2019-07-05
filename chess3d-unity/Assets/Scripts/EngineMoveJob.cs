@@ -11,19 +11,11 @@ using UnityEngine;
 
 namespace Assets.Scripts
 {
-    public class EngineMoveJob
+    public class EngineMoveJob : IDisposable
     {
-        public struct EngineUnityJob : IJob
-        {
-            public void Execute()
-            {
-                _engine.AiPonderMove();
-            }
-        }
+        private enum EngineMoveMode {UiThread, WorkerThread}
 
-        public enum EngineMoveMode {Job, Thread}
-
-        private static Engine _engine;
+        private Engine _engine;
         private readonly EngineMoveMode _mode;
 
         private Semaphore _signal;
@@ -31,43 +23,90 @@ namespace Assets.Scripts
         private Thread _aiThread;
         private JobHandle _jobHandle;
 
+        private CancellationTokenSource _ctsMove;
+        private CancellationTokenSource _ctsThread = new CancellationTokenSource();
+
+        public bool IsCompleted => !_aiThinking;
+        public bool Aborted { get; private set; }
+
         public EngineMoveJob(Engine engine)
         {
             _engine = engine;
-            _mode = Application.platform == RuntimePlatform.WebGLPlayer ? EngineMoveMode.Job : EngineMoveMode.Thread;
+            _mode = Application.platform == RuntimePlatform.WebGLPlayer ? EngineMoveMode.UiThread : EngineMoveMode.WorkerThread;
 
-            if (_mode == EngineMoveMode.Thread)
+            if (_mode == EngineMoveMode.WorkerThread)
             {
                 _signal = new Semaphore(0, 1);
-                _aiThread = new Thread(AiAction);
+                _aiThread = new Thread(WorkerThreadAction);
                 _aiThread.Start();
             }
         }
 
         private void AiAction()
         {
-            while (_signal.WaitOne())
+            try
             {
-                _engine.AiPonderMove();
+                _engine.AiPonderMove(_ctsMove.Token);
+            }
+            catch (OperationCanceledException)
+            {
+
+            }
+            finally
+            {
                 _aiThinking = false;
+            }
+        }
+
+        private void WorkerThreadAction()
+        {
+            while (!_ctsThread.IsCancellationRequested && _signal.WaitOne())
+            {
+                if (_ctsThread.IsCancellationRequested)
+                    break;
+
+                AiAction();
             }
         }
 
         public void Start()
         {
-            if (_mode == EngineMoveMode.Thread)
+            if (_aiThinking)
+                throw new InvalidOperationException("Ai move already started");
+
+            Aborted = false;
+            _aiThinking = true;
+            
+            if (_mode == EngineMoveMode.WorkerThread)
             {
-                _aiThinking = true;
+                _ctsMove = new CancellationTokenSource();
                 _signal.Release();
             }
 
-            if (_mode == EngineMoveMode.Job)
+            if (_mode == EngineMoveMode.UiThread)
             {
-                var job = new EngineUnityJob();
-                _jobHandle = job.Schedule();
+                AiAction();
             }
         }
 
-        public bool IsCompleted => _mode == EngineMoveMode.Thread ? !_aiThinking : _jobHandle.IsCompleted;
+        public void Abort()
+        {
+            if (_mode == EngineMoveMode.UiThread) return;
+            if (!_aiThinking) return;
+
+            Aborted = true;
+            _ctsMove.Cancel();
+        }
+
+        public void Dispose()
+        {
+            if (_mode == EngineMoveMode.UiThread) return;
+
+            Abort();
+            _ctsMove?.Dispose();
+            _ctsThread.Cancel();
+            _signal.Release();
+            _signal.Dispose();
+        }
     }
 }

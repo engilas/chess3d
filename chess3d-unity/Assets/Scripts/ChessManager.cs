@@ -30,7 +30,14 @@ public class ChessManager : MonoBehaviour
         uiManager.OnRestartClick += () => Restart();
 
     }
-    
+
+    void OnDestroy()
+    {
+        _engineMoveJob.Abort();
+        _engineMoveJob.Dispose();
+    }
+
+
     void DeselectPiece()
     {
         _platformManager.Clear();
@@ -122,10 +129,13 @@ public class ChessManager : MonoBehaviour
 
         while (!_engineMoveJob.IsCompleted)
             yield return null;
-        
-        _board.Move(_engine.LastMove);
 
-        CheckEndGame();
+        if (!_engineMoveJob.Aborted)
+        {
+            _board.Move(_engine.LastMove);
+            CheckEndGame();
+        }
+        
         _playerLock = false;
     }
 
@@ -189,6 +199,7 @@ public class ChessManager : MonoBehaviour
 
     private void Restart()
     {
+        _engineMoveJob.Abort();
         foreach (var p in _allPieces)
             Destroy(p.gameObject);
         _gameOver = false;
