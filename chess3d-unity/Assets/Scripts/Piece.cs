@@ -16,7 +16,7 @@ namespace Assets.Scripts
 
         public float SelectOffset = 0.5f;
         
-        private float _highlightIntensity = 60/255f;
+        private readonly float _highlightIntensity = 60/255f;
         private Color _highlightColor;
 
         private bool _selected;
@@ -37,7 +37,7 @@ namespace Assets.Scripts
             Position = p;
 
             Deselect();
-            transform.position = new Vector3(p.Col, taken ? -0.5f : 0f, p.Row);
+            transform.position = new Vector3(7 - p.Col, taken ? -0.5f : 0f, p.Row);
 
             OnPositionChange?.Invoke(p);
         }

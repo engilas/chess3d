@@ -39,8 +39,7 @@ public class MainMenuController : MonoBehaviour
             _difficultySlider.value = diff;
         }
     }
-
-    // Start is called before the first frame update
+    
     public void PlayWithAi()
     {
         _offlinePanel.SetActive(false);
@@ -49,6 +48,13 @@ public class MainMenuController : MonoBehaviour
 
     public void StartPlayWithAi()
     {
+        Settings.GameMode = GameMode.OfflineAi;
+        SceneManager.LoadScene("MainScene");
+    }
+
+    public void StartPlayOfflineMp()
+    {
+        Settings.GameMode = GameMode.OfflineMp;
         SceneManager.LoadScene("MainScene");
     }
 

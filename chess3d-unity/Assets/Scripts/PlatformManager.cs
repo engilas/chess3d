@@ -43,7 +43,7 @@ namespace Assets.Scripts
                 var moveRow = validMoves[i][1];
 
                 var platform = (GameObject) Object.Instantiate(_platformPrefab);
-                platform.transform.position += new Vector3(moveCol, 0, moveRow);
+                platform.transform.position += new Vector3(7 - moveCol, 0, moveRow);
                 _platforms.Add(platform);
             }
         }
