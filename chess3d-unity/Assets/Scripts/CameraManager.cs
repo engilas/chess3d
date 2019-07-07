@@ -23,7 +23,7 @@ public class CameraManager : MonoBehaviour
     {
         SetDefault(smooth: false);
         if (Settings.FrontView)
-            ToggleFrontView();
+            ToggleFrontView(false);
     }
 
     public void MoveOtherSide()
@@ -41,6 +41,11 @@ public class CameraManager : MonoBehaviour
 
     public void ToggleFrontView()
     {
+        ToggleFrontView(true);
+    }
+
+    private void ToggleFrontView(bool smooth)
+    {
         _frontView = !_frontView;
         Settings.FrontView = _frontView;
 
@@ -50,21 +55,19 @@ public class CameraManager : MonoBehaviour
             var pos = new Vector3(BoardCenter, transform.position.y, BoardCenter + offset);
             var lookAt = new Vector3(BoardCenter, 0, BoardCenter);
 
-            MoveCamera(pos, lookAt, false, slerp: false);
-            _camera.fieldOfView = 70;
+            MoveCamera(pos, lookAt, smooth, slerp: false, fov: 70);
         }
         else
         {
-            SetDefault(false, slerp: false);
-            _camera.fieldOfView = 60;
+            SetDefault(smooth, slerp: false, startRotateAfter: 0.15f);
         }
     }
 
-    private void SetDefault(bool smooth = false, bool slerp = true, float speed = 1)
+    private void SetDefault(bool smooth = false, bool slerp = true, float speed = 1, float startRotateAfter = 0)
     {
         var pos = new Vector3(BoardCenter, StartYPos, GetZ());
         var lookAt = new Vector3(BoardCenter, 0, Mathf.Abs(pos.z - 3f));
-        MoveCamera(pos, lookAt, smooth, slerp, speed);
+        MoveCamera(pos, lookAt, smooth, slerp, speed, startRotateAfter: startRotateAfter, fov: 60);
     }
 
     //mirror z pos
@@ -74,16 +77,18 @@ public class CameraManager : MonoBehaviour
         MoveCamera(pos, lookAt, smooth, slerp: true, speed: speed);
     }
 
-    private void MoveCamera(Vector3 pos, Vector3 lookAt, bool smooth = false, bool slerp = false, float speed = 1)
+    private void MoveCamera(Vector3 pos, Vector3 lookAt, bool smooth = false, bool slerp = false, float speed = 1, float startRotateAfter = 0, float? fov = null)
     {
         if (smooth)
         {
-            StartCoroutine(CameraTransition(speed, pos, lookAt, slerp, fov: _camera.fieldOfView));
+            StartCoroutine(CameraTransition(speed, pos, lookAt, slerp, fov: fov ?? _camera.fieldOfView, startRotateAfter));
         }
         else
         {
             transform.position = pos;
             transform.LookAt(lookAt);
+            if (fov != null)
+                _camera.fieldOfView = fov.Value;
         }
     }
 
@@ -99,7 +104,7 @@ public class CameraManager : MonoBehaviour
         else return -StartZPos + 2 * BoardCenter;
     }
 
-    private IEnumerator CameraTransition(float lerpSpeed, Vector3 newPosition, Vector3 lookAt, bool slerpPosition = true, float fov = 60)
+    private IEnumerator CameraTransition(float lerpSpeed, Vector3 newPosition, Vector3 lookAt, bool slerpPosition = true, float fov = 60, float startRotateAfter = 0)
     {
         if (PlayerLock.CameraLock) yield break;
 
@@ -129,7 +134,8 @@ public class CameraManager : MonoBehaviour
             }
             
             var relativePos = lookAt - transform.position;
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(relativePos), t);
+            if (t >= startRotateAfter)
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(relativePos), t);
             _camera.fieldOfView = Mathf.Lerp(startingFov, fov, t);
             yield return 0;
         }
