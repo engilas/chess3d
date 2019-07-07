@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -18,7 +16,7 @@ public class UIManager : MonoBehaviour
 
     public event Action OnRestartClick;
 
-    public bool IsMenuActive => gameOverPanel.activeSelf || escapePanel.activeSelf;
+    //public bool IsMenuActive => gameOverPanel.activeSelf || escapePanel.activeSelf;
 
     private bool _frontToggleEnabled = false;
 
@@ -44,12 +42,14 @@ public class UIManager : MonoBehaviour
     {
         gameOverDesc.text = description;
         gameOverPanel.SetActive(true);
+        PlayerLock.MenuLock = true;
     }
 
     public void RestartClick()
     {
         gameOverPanel.SetActive(false);
         escapePanel.SetActive(false);
+        PlayerLock.MenuLock = false;
         OnRestartClick?.Invoke();
     }
 
@@ -61,6 +61,15 @@ public class UIManager : MonoBehaviour
     public void TopViewClick()
     {
         if (_frontToggleEnabled)
-            cameraManager.ToggleFrontView();
+        {
+            if (!PlayerLock.CameraLock)
+                cameraManager.ToggleFrontView();
+            else
+            {
+                _frontToggleEnabled = false;
+                frontViewToggle.isOn = !frontViewToggle.isOn;
+                _frontToggleEnabled = true;
+            }
+        }
     }
 }

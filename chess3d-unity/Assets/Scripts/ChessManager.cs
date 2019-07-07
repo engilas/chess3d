@@ -53,9 +53,9 @@ public class ChessManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (uiManager.IsMenuActive) return;
+        //if (uiManager.IsMenuActive) return;
 
-        if (!_chessState.GameOver && !_chessState.PlayerLock && Input.GetMouseButtonDown(0))
+        if (!PlayerLock.IsLocked && Input.GetMouseButtonDown(0))
         {
             if (!Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out var hitInfo)) 
             {
@@ -162,7 +162,8 @@ public class ChessManager : MonoBehaviour
 
         if (reason != null)
         {
-            _chessState.GameOver = true;
+            //_chessState.GameOver = true;
+            PlayerLock.GameLock = true;
             uiManager.ShowGameOver(reason);
             return true;
         }
@@ -183,8 +184,7 @@ public class ChessManager : MonoBehaviour
         _chessStrategy.StopGame();
         foreach (var p in _allPieces)
             Destroy(p.gameObject);
-        _chessState.GameOver = false;
-        _chessState.PlayerLock = false;
+        PlayerLock.GameLock = false;
         StartGame();
     }
 }

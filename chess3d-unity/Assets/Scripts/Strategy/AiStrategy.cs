@@ -21,7 +21,7 @@ public class AiStrategy : IChessStrategy
 
     public void Move()
     {
-        _chessState.PlayerLock = true;
+        PlayerLock.GameLock = true;
         _chessState.MonoBehaviour.StartCoroutine(EngineMove());
     }
 
@@ -49,6 +49,6 @@ public class AiStrategy : IChessStrategy
             _chessState.Board.Move(_chessState.Engine.LastMove);
         }
 
-        _chessState.PlayerLock = false;
+        PlayerLock.GameLock = false;
     }
 }

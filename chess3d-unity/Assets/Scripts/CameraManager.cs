@@ -17,7 +17,6 @@ public class CameraManager : MonoBehaviour
     void Start()
     {
         _camera = GetComponent<Camera>();
-        
     }
 
     public void InitCamera()
@@ -102,6 +101,10 @@ public class CameraManager : MonoBehaviour
 
     private IEnumerator CameraTransition(float lerpSpeed, Vector3 newPosition, Vector3 lookAt, bool slerpPosition = true, float fov = 60)
     {
+        if (PlayerLock.CameraLock) yield break;
+
+        PlayerLock.CameraLock = true;
+
         var t = 0.0f;
         var startingPos = transform.position;
         var startingFov = _camera.fieldOfView;
@@ -130,5 +133,7 @@ public class CameraManager : MonoBehaviour
             _camera.fieldOfView = Mathf.Lerp(startingFov, fov, t);
             yield return 0;
         }
+
+        PlayerLock.CameraLock = false;
     }
 }
