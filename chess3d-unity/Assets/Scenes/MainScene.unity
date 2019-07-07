@@ -1815,6 +1815,7 @@ MonoBehaviour:
   gameOverPanel: {fileID: 332846541}
   escapePanel: {fileID: 1203935251}
   gameOverDesc: {fileID: 659211223}
+  frontViewToggle: {fileID: 1145553515}
 --- !u!4 &1458777808
 Transform:
   m_ObjectHideFlags: 0

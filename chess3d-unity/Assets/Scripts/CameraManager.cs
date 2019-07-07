@@ -1,4 +1,5 @@
 ﻿using ChessEngine.Engine;
+using System.Collections;
 using UnityEngine;
 
 public class CameraManager : MonoBehaviour
@@ -16,21 +17,27 @@ public class CameraManager : MonoBehaviour
     void Start()
     {
         _camera = GetComponent<Camera>();
+        
     }
 
     public void InitCamera()
     {
-        SetDefault();
+        SetDefault(smooth: false);
+        if (Settings.FrontView)
+            ToggleFrontView();
     }
 
     public void MoveOtherSide()
     {
         ToggleSide();
-        SetDefault();
-
-        //re-activate front view
-        ToggleFrontView();
-        ToggleFrontView();
+        if (!_frontView)
+        {
+            SetDefault(smooth: true);
+        }
+        else
+        {
+            ChangeCameraSide(new Vector3(BoardCenter, 0, BoardCenter), smooth: true);
+        }
     }
 
     public void ToggleFrontView()
@@ -40,23 +47,45 @@ public class CameraManager : MonoBehaviour
 
         if (_frontView)
         {
-            var offset = _side == ChessPieceColor.White ? 1e-3f : -1e-3f;
-            transform.position = new Vector3(BoardCenter, transform.position.y, BoardCenter + offset);
-            transform.LookAt(new Vector3(BoardCenter, 0, BoardCenter));
+            var offset = _side == ChessPieceColor.White ? 1e-1f : -1e-1f;
+            var pos = new Vector3(BoardCenter, transform.position.y, BoardCenter + offset);
+            var lookAt = new Vector3(BoardCenter, 0, BoardCenter);
+
+            MoveCamera(pos, lookAt, false, slerp: false);
             _camera.fieldOfView = 70;
         }
         else
         {
+            SetDefault(false, slerp: false);
             _camera.fieldOfView = 60;
-            SetDefault();
         }
     }
 
-    private void SetDefault()
+    private void SetDefault(bool smooth = false, bool slerp = true, float speed = 1)
     {
         var pos = new Vector3(BoardCenter, StartYPos, GetZ());
-        transform.position = pos;
-        transform.LookAt(new Vector3(BoardCenter, 0, Mathf.Abs(pos.z - 3f)));
+        var lookAt = new Vector3(BoardCenter, 0, Mathf.Abs(pos.z - 3f));
+        MoveCamera(pos, lookAt, smooth, slerp, speed);
+    }
+
+    //mirror z pos
+    private void ChangeCameraSide(Vector3 lookAt, bool smooth = false, float speed = 1)
+    {
+        var pos = new Vector3(BoardCenter, StartYPos, - transform.position.z + 2 * BoardCenter);
+        MoveCamera(pos, lookAt, smooth, slerp: true, speed: speed);
+    }
+
+    private void MoveCamera(Vector3 pos, Vector3 lookAt, bool smooth = false, bool slerp = false, float speed = 1)
+    {
+        if (smooth)
+        {
+            StartCoroutine(CameraTransition(speed, pos, lookAt, slerp, fov: _camera.fieldOfView));
+        }
+        else
+        {
+            transform.position = pos;
+            transform.LookAt(lookAt);
+        }
     }
 
     private void ToggleSide()
@@ -69,5 +98,37 @@ public class CameraManager : MonoBehaviour
     {
         if (_side == ChessPieceColor.White) return StartZPos;
         else return -StartZPos + 2 * BoardCenter;
+    }
+
+    private IEnumerator CameraTransition(float lerpSpeed, Vector3 newPosition, Vector3 lookAt, bool slerpPosition = true, float fov = 60)
+    {
+        var t = 0.0f;
+        var startingPos = transform.position;
+        var startingFov = _camera.fieldOfView;
+
+        Vector3 center = (startingPos + newPosition) * 0.5F;
+        // move the center a bit downwards to make the arc vertical
+        //center -= new Vector3(0, 1, 0);
+        Vector3 riseRelCenter = startingPos - center;
+        Vector3 setRelCenter = newPosition - center;
+
+        while (t < 1.0f)
+        {
+            t += Time.deltaTime * (Time.timeScale / lerpSpeed);
+            if (slerpPosition)
+            {
+                transform.position = Vector3.Slerp(riseRelCenter, setRelCenter, t);
+                transform.position += center;
+            }
+            else
+            {
+                transform.position = Vector3.Lerp(startingPos, newPosition, t);
+            }
+            
+            var relativePos = lookAt - transform.position;
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(relativePos), t);
+            _camera.fieldOfView = Mathf.Lerp(startingFov, fov, t);
+            yield return 0;
+        }
     }
 }

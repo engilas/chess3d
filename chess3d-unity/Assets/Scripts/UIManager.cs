@@ -20,12 +20,16 @@ public class UIManager : MonoBehaviour
 
     public bool IsMenuActive => gameOverPanel.activeSelf || escapePanel.activeSelf;
 
+    private bool _frontToggleEnabled = false;
+
     void Start()
     {
         cameraManager = FindObjectOfType<CameraManager>();
         gameOverPanel.SetActive(false);
         escapePanel.SetActive(false);
+
         frontViewToggle.isOn = !Settings.FrontView;
+        _frontToggleEnabled = true;
     }
 
     void Update()
@@ -56,6 +60,7 @@ public class UIManager : MonoBehaviour
 
     public void TopViewClick()
     {
-        cameraManager.ToggleFrontView();
+        if (_frontToggleEnabled)
+            cameraManager.ToggleFrontView();
     }
 }
