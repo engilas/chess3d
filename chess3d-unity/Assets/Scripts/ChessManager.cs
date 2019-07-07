@@ -27,6 +27,7 @@ public class ChessManager : MonoBehaviour
         _platformManager = new PlatformManager(_engine);
         uiManager.OnRestartClick += () => Restart();
 
+        FindObjectOfType<CameraManager>().InitCamera();
     }
 
     void OnDestroy()

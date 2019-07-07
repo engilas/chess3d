@@ -28,7 +28,7 @@ namespace Assets.Scripts.Models
 
         public override string ToString()
         {
-            return (char)('a' + Col) + (Row + 1).ToString();
+            return (char)('a' + 7 - Col) + (Row + 1).ToString();
         }
     }
 }

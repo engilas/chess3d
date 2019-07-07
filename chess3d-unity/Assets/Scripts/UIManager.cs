@@ -12,6 +12,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private GameObject escapePanel;
     [SerializeField] private TextMeshProUGUI gameOverDesc;
+    [SerializeField] private Toggle frontViewToggle;
+
+    private CameraManager cameraManager;
 
     public event Action OnRestartClick;
 
@@ -19,8 +22,10 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
+        cameraManager = FindObjectOfType<CameraManager>();
         gameOverPanel.SetActive(false);
         escapePanel.SetActive(false);
+        frontViewToggle.isOn = !Settings.FrontView;
     }
 
     void Update()
@@ -47,5 +52,10 @@ public class UIManager : MonoBehaviour
     public void ExitMenuClick()
     {
         SceneManager.LoadScene("Menu");
+    }
+
+    public void TopViewClick()
+    {
+        cameraManager.ToggleFrontView();
     }
 }

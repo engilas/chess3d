@@ -13,8 +13,6 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private GameObject _playAiPanel;
     [SerializeField] private Slider _difficultySlider;
 
-    private const string DifficultyPrefKey = "DifficultyPrefKey";
-
     private void Start()
     {
         var platformsWithExitButton = new[] { RuntimePlatform.LinuxPlayer, RuntimePlatform.LinuxEditor, RuntimePlatform.OSXPlayer, RuntimePlatform.OSXEditor, RuntimePlatform.WindowsPlayer, RuntimePlatform.WindowsEditor };
@@ -27,17 +25,7 @@ public class MainMenuController : MonoBehaviour
         _offlinePanel.SetActive(false);
         _playAiPanel.SetActive(false);
 
-        if (PlayerPrefs.HasKey(DifficultyPrefKey))
-        {
-            var diff = PlayerPrefs.GetInt(DifficultyPrefKey);
-            Settings.Difficulty = diff;
-            _difficultySlider.value = diff;
-        } else
-        {
-            var diff = Settings.DefaultDifficulty;
-            SetDifficulty(diff);
-            _difficultySlider.value = diff;
-        }
+        _difficultySlider.value = Settings.Difficulty;
     }
     
     public void PlayWithAi()
@@ -78,17 +66,11 @@ public class MainMenuController : MonoBehaviour
 
     public void OnDifficultyChanged(float value)
     {
-        SetDifficulty((int)value);
+        Settings.Difficulty = (int) value;
     }
 
     public void Exit()
     {
         Application.Quit();
-    }
-
-    private void SetDifficulty(int value)
-    {
-        Settings.Difficulty = value;
-        PlayerPrefs.SetInt(DifficultyPrefKey, value);
     }
 }
