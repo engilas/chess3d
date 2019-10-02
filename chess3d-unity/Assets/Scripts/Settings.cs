@@ -8,7 +8,10 @@ using UnityEngine;
 public enum GameMode
 {
     OfflineAi,
-    OfflineMp
+    OfflineMp,
+
+    OnlineAi,
+    OnlineQuick,
 }
 
 public static class Settings
