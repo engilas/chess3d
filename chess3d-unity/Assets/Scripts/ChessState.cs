@@ -8,4 +8,5 @@ public class ChessState
     public Engine Engine;
     public Board Board;
     public MonoBehaviour MonoBehaviour;
+    public IChessManager ChessManager;
 }

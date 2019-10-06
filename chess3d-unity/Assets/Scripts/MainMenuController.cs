@@ -1,25 +1,37 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using System.Net.Http;
+using TMPro;
 using UnityEngine.UI;
 
 public class MainMenuController : MonoBehaviour
 {
-    [SerializeField] private GameObject _exitButton;
     [SerializeField] private GameObject _mainPanel;
     [SerializeField] private GameObject _onlinePanel;
     [SerializeField] private GameObject _waitConnectPanel;
     [SerializeField] private GameObject _offlinePanel;
     [SerializeField] private GameObject _playAiPanel;
+    [SerializeField] private GameObject _settingsPanel;
+    [SerializeField] private GameObject _errorPanel;
+
+    [SerializeField] private GameObject _exitButton;
     [SerializeField] private Slider _difficultySlider;
+    [SerializeField] private TMP_InputField _serverIpInput;
+    [SerializeField] private TextMeshProUGUI _errorTitle;
+    [SerializeField] private TextMeshProUGUI _errorDesc;
 
     private GameObject[] _panels;
 
     private void Start()
     {
-        _panels = new[] {_exitButton, _mainPanel, _onlinePanel, _waitConnectPanel, _offlinePanel, _playAiPanel};
+        _panels = new[]
+        {
+            _mainPanel, _onlinePanel, _waitConnectPanel, _offlinePanel, _playAiPanel, _settingsPanel,
+            _errorPanel
+        };
         SetActivePanel(_mainPanel);
 
         var platformsWithExitButton = new[]
@@ -27,6 +39,8 @@ public class MainMenuController : MonoBehaviour
             RuntimePlatform.LinuxPlayer, RuntimePlatform.LinuxEditor, RuntimePlatform.OSXPlayer,
             RuntimePlatform.OSXEditor, RuntimePlatform.WindowsPlayer, RuntimePlatform.WindowsEditor
         };
+
+        Debug.Log("Running platform: " + Application.platform);
 
         if (!platformsWithExitButton.Contains(Application.platform))
             _exitButton.SetActive(false);
@@ -59,6 +73,33 @@ public class MainMenuController : MonoBehaviour
         StartCoroutine(ConnectCoroutine());
     }
 
+    public void StopConnect()
+    {
+        OnlineManager.StopConnection();
+        SetActivePanel(_onlinePanel);
+    }
+
+    public void SettingsClick()
+    {
+        _serverIpInput.text = Settings.ServerIp;
+        SetActivePanel(_settingsPanel);
+    }
+
+    public void SettingsSave()
+    {
+        var ip = _serverIpInput.text;
+        if (Uri.TryCreate(ip, UriKind.Absolute, out _))
+        {
+            Settings.ServerIp = ip;
+        }
+        else
+        {
+            Debug.LogError("Invalid ip " + ip);
+        }
+
+        GoMainMenu();
+    }
+
     public void PlayOffline()
     {
         SetActivePanel(_offlinePanel);
@@ -89,6 +130,13 @@ public class MainMenuController : MonoBehaviour
         Application.Quit();
     }
 
+    private void ShowErrorPanel(string title, string desc)
+    {
+        _errorTitle.text = title;
+        _errorDesc.text = desc;
+        SetActivePanel(_errorPanel);
+    }
+
     private void SetActivePanel(GameObject activePanel)
     {
         foreach (var panel in _panels)
@@ -101,27 +149,32 @@ public class MainMenuController : MonoBehaviour
     private IEnumerator ConnectCoroutine()
     {
         OnlineManager.Connect();
-        int timeoutSeconds = 100;
-        int seconds = 0;
         while (true)
         {
             yield return new WaitForSeconds(1);
-            seconds++;
-            if (OnlineManager.IsFailed())
+            if (OnlineManager.IsConnectionFailed())
             {
-                var exn = OnlineManager.GetError();
-                Debug.Log("Failed. " + exn?.Message);
+                var exn = OnlineManager.GetConnectionError();
+                var errorTitle = "Connection failed";
+                if (exn == null)
+                {
+                    ShowErrorPanel(errorTitle, "Something goes wrong");
+                }
+                else
+                {
+                    var errorDesc = exn is HttpRequestException ? "Can't connect to the server" : exn.Message;
+                    ShowErrorPanel(errorTitle, errorDesc);
+                }
+                
+                Debug.LogError("Connection failed. " + exn?.Message);
                 yield break;
             }
 
             if (OnlineManager.IsConnected())
             {
                 Debug.Log("Connected");
-                yield break;
-            }
 
-            if (seconds >= timeoutSeconds)
-            {
+                SceneManager.LoadScene("MainScene");
                 yield break;
             }
         }

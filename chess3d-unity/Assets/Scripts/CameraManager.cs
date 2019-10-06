@@ -16,6 +16,7 @@ public class CameraManager : MonoBehaviour
 
     void Start()
     {
+        _side = Settings.InitialCameraSide;
         _camera = GetComponent<Camera>();
     }
 
@@ -81,7 +82,7 @@ public class CameraManager : MonoBehaviour
     {
         if (smooth)
         {
-            StartCoroutine(CameraTransition(speed, pos, lookAt, slerp, fov: fov ?? _camera.fieldOfView, startRotateAfter));
+            StartCoroutine(CameraTransition(speed, pos, lookAt, slerp, fov ?? _camera.fieldOfView, startRotateAfter));
         }
         else
         {

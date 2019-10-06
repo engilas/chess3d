@@ -14,6 +14,8 @@ public static class ChessStrategyFactory
                 return new AiStrategy();
             case GameMode.OfflineMp:
                 return new OfflineMpStrategy();
+            case GameMode.OnlineQuick:
+                return new OnlineMpStrategy();
             default:
                 throw new NotImplementedException();
         }

@@ -9,12 +9,15 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private GameObject escapePanel;
+    [SerializeField] private GameObject gameOverRestartButton;
+    [SerializeField] private GameObject escapeRestartButton;
     [SerializeField] private TextMeshProUGUI gameOverDesc;
     [SerializeField] private Toggle frontViewToggle;
 
     private CameraManager cameraManager;
 
     public event Action OnRestartClick;
+    public event Action OnExitClick;
 
     //public bool IsMenuActive => gameOverPanel.activeSelf || escapePanel.activeSelf;
 
@@ -55,6 +58,7 @@ public class UIManager : MonoBehaviour
 
     public void ExitMenuClick()
     {
+        OnExitClick?.Invoke();
         SceneManager.LoadScene("Menu");
     }
 
@@ -71,5 +75,11 @@ public class UIManager : MonoBehaviour
                 _frontToggleEnabled = true;
             }
         }
+    }
+
+    public void EnableRestartButtons(bool enabled)
+    {
+        gameOverRestartButton.SetActive(enabled);
+        escapeRestartButton.SetActive(enabled);
     }
 }

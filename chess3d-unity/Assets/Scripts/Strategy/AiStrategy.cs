@@ -1,11 +1,6 @@
 ﻿using Assets.Scripts;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+using ChessEngine.Engine;
 
 public class AiStrategy : IChessStrategy
 {
@@ -19,8 +14,10 @@ public class AiStrategy : IChessStrategy
         _engineMoveJob = new EngineMoveJob(_chessState.Engine);
     }
 
-    public void Move()
+    public void Move(MoveContent move)
     {
+        if (_chessState.Engine.CheckEndGame() != null) return;
+
         PlayerLock.GameLock = true;
         _chessState.MonoBehaviour.StartCoroutine(EngineMove());
     }
@@ -29,6 +26,11 @@ public class AiStrategy : IChessStrategy
     {
         _engineMoveJob.Abort();
         _engineMoveJob.Dispose();
+    }
+
+    public bool IsRestartAllowed()
+    {
+        return true;
     }
 
     public void StopGame()

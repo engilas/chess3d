@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ChessEngine.Engine;
 using UnityEngine;
 
 public enum GameMode
@@ -18,6 +19,7 @@ public static class Settings
 {
     private const string DifficultyPrefKey = "DifficultyPrefKey";
     private const string FrontViewPrefKey = "FrontViewPrefKey";
+    private const string DefaultServerIp = "http://localhost:5000";
 
     private static int _difficulty;
 
@@ -55,4 +57,15 @@ public static class Settings
     }
 
     public static GameMode GameMode { get; set; }
+    public static ChessPieceColor InitialCameraSide { get; set; }
+
+    public static string ServerIp
+    {
+        get
+        {
+            var ip =  PlayerPrefs.GetString(nameof(ServerIp));
+            return string.IsNullOrWhiteSpace(ip) ? DefaultServerIp : ip;
+        }
+        set => PlayerPrefs.SetString(nameof(ServerIp), value);
+    }
 }

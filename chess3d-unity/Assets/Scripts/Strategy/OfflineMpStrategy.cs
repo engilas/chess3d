@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts;
+using UnityEngine;
 using ChessEngine.Engine;
 
 public class OfflineMpStrategy : IChessStrategy
@@ -12,8 +13,10 @@ public class OfflineMpStrategy : IChessStrategy
         _chessState = state;
     }
 
-    public void Move()
+    public void Move(MoveContent move)
     {
+        if (_chessState.Engine.CheckEndGame() != null) return;
+
         //swap active color
         if (_chessState.PlayerColor == ChessPieceColor.Black)
             _chessState.PlayerColor = ChessPieceColor.White;
@@ -25,6 +28,11 @@ public class OfflineMpStrategy : IChessStrategy
 
     public void OnDestroy()
     {
+    }
+
+    public bool IsRestartAllowed()
+    {
+        return true;
     }
 
     public void StopGame()
