@@ -127,7 +127,11 @@ public class MainMenuController : MonoBehaviour
 
     public void Exit()
     {
-        Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit ();
+#endif
     }
 
     private void ShowErrorPanel(string title, string desc)

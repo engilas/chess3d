@@ -9,12 +9,16 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private GameObject escapePanel;
+    [SerializeField] private GameObject confirmPanel;
     [SerializeField] private GameObject gameOverRestartButton;
     [SerializeField] private GameObject escapeRestartButton;
     [SerializeField] private TextMeshProUGUI gameOverDesc;
+    [SerializeField] private TextMeshProUGUI confirmDesc;
     [SerializeField] private Toggle frontViewToggle;
+    [SerializeField] private Toggle menuToggle;
 
     private CameraManager cameraManager;
+    private Action _confirmAction;
 
     public event Action OnRestartClick;
     public event Action OnExitClick;
@@ -26,8 +30,7 @@ public class UIManager : MonoBehaviour
     void Start()
     {
         cameraManager = FindObjectOfType<CameraManager>();
-        gameOverPanel.SetActive(false);
-        escapePanel.SetActive(false);
+        ResetUi();
 
         frontViewToggle.isOn = !Settings.FrontView;
         _frontToggleEnabled = true;
@@ -37,7 +40,21 @@ public class UIManager : MonoBehaviour
     {
         if (Input.GetKeyDown("escape"))
         {
-            escapePanel.SetActive(!escapePanel.activeSelf);
+            menuToggle.isOn = !menuToggle.isOn;
+        }
+    }
+
+    public void OnToggleMenu()
+    {
+        confirmPanel.SetActive(false);
+        escapePanel.SetActive(!menuToggle.isOn);
+    }
+
+    public void CloseMenu()
+    {
+        if (!menuToggle.isOn)
+        {
+            menuToggle.isOn = true;
         }
     }
 
@@ -50,16 +67,32 @@ public class UIManager : MonoBehaviour
 
     public void RestartClick()
     {
-        gameOverPanel.SetActive(false);
-        escapePanel.SetActive(false);
-        PlayerLock.MenuLock = false;
-        OnRestartClick?.Invoke();
+        SetupConfirm("Restart", () =>
+        {
+            ResetUi();
+            PlayerLock.MenuLock = false;
+            OnRestartClick?.Invoke();
+        });
     }
 
     public void ExitMenuClick()
     {
-        OnExitClick?.Invoke();
-        SceneManager.LoadScene("Menu");
+        SetupConfirm("Quit", () =>
+        {
+            OnExitClick?.Invoke();
+            SceneManager.LoadScene("Menu");
+        });
+    }
+
+    public void ConfirmClick()
+    {
+        _confirmAction?.Invoke();
+    }
+
+    public void RejectClick()
+    {
+        confirmPanel.SetActive(false);
+        escapePanel.SetActive(true);
     }
 
     public void TopViewClick()
@@ -81,5 +114,21 @@ public class UIManager : MonoBehaviour
     {
         gameOverRestartButton.SetActive(enabled);
         escapeRestartButton.SetActive(enabled);
+    }
+
+    private void ResetUi()
+    {
+        CloseMenu();
+        gameOverPanel.SetActive(false);
+        escapePanel.SetActive(false);
+        confirmPanel.SetActive(false);
+    }
+
+    private void SetupConfirm(string title, Action confirmAction)
+    {
+        escapePanel.SetActive(false);
+        confirmPanel.SetActive(true);
+        confirmDesc.text = $"{title} the game?";
+        _confirmAction = confirmAction;
     }
 }
