@@ -170,7 +170,7 @@ public class MainMenuController : MonoBehaviour
                     ShowErrorPanel(errorTitle, errorDesc);
                 }
                 
-                Debug.LogError("Connection failed. " + exn?.Message);
+                Debug.LogError("Connection failed. \n" + exn);
                 yield break;
             }
 

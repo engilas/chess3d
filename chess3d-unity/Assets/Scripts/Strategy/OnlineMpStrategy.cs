@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ChessEngine.Engine;
 using Microsoft.FSharp.Core;
 using Types;
@@ -31,10 +31,10 @@ public class OnlineMpStrategy : IChessStrategy
         _chessState.ChessManager.StopGame(reasonString);
     }
 
-    private void OnlineManagerOnEndGame(Command.EndGameNotify engGame)
+    private void OnlineManagerOnEndGame(Command.EndGameNotify endGame)
     {
         Debug.Log("End game event from server");
-        // пока завершать игру будет ChessMgr
+        _chessState.ChessManager.StopGame(endGame.Reason);
     }
 
     private void OnlineManagerOnOnOpponentMove(Domain.MoveDescription move)
@@ -99,11 +99,18 @@ public class OnlineMpStrategy : IChessStrategy
     public void OnDestroy()
     {
         OnlineManager.OnOpponentMove -= OnlineManagerOnOnOpponentMove;
+        OnlineManager.OnEndGame -= OnlineManagerOnEndGame;
+        OnlineManager.OnSessionClosed -= OnlineManagerOnSessionClosed;
         OnlineManager.StopConnection();
     }
 
     public bool IsRestartAllowed()
     {
         return false;
+    }
+
+    public bool IsGameOverControl()
+    {
+        return true;
     }
 }

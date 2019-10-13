@@ -12,4 +12,5 @@ public interface IChessStrategy
     void StopGame();
     void OnDestroy();
     bool IsRestartAllowed();
+    bool IsGameOverControl();
 }

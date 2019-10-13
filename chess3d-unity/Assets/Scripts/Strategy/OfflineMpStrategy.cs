@@ -43,4 +43,9 @@ public class OfflineMpStrategy : IChessStrategy
             _chessState.PlayerColor = ChessPieceColor.White;
         }
     }
+
+    public bool IsGameOverControl()
+    {
+        return false;
+    }
 }

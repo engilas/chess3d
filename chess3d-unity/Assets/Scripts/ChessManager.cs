@@ -1,4 +1,4 @@
-п»їusing Assets.Scripts;
+using Assets.Scripts;
 using Assets.Scripts.Models;
 using UnityEngine;
 using ChessEngine.Engine;
@@ -17,6 +17,9 @@ public class ChessManager : MonoBehaviour, IChessManager
 
     void Start()
     {
+        PlayerLock.GameLock = false;
+        PlayerLock.MenuLock = false;
+
         _chessState = new ChessState {Engine = _engine, MonoBehaviour = this, ChessManager = this};
         _chessStrategy = ChessStrategyFactory.ResolveStrategy();
         _chessStrategy.Init(_chessState);
@@ -103,7 +106,10 @@ public class ChessManager : MonoBehaviour, IChessManager
                 {
                     _chessState.Board.Move(_engine.LastMove);
                     _chessStrategy.Move(_engine.LastMove);
-                    TryStopByEndGame();
+                    if (!_chessStrategy.IsGameOverControl())
+                    {
+                        TryStopByEndGame();
+                    }
                 }
                 else
                 {
@@ -132,6 +138,7 @@ public class ChessManager : MonoBehaviour, IChessManager
         _engine.PlyDepthSearched = (byte) Settings.Difficulty;
         _allPieces = BoardLoader.FillBoard(_engine);
         _chessState.Board = new Board(_allPieces);
+        PlayerLock.MenuLock = false;
     }
 
     private void Restart()
@@ -140,6 +147,7 @@ public class ChessManager : MonoBehaviour, IChessManager
         _chessStrategy.StopGame();
         foreach (var p in _allPieces)
             Destroy(p.gameObject);
+        // todo: работает только для стратегий, где игрок всегда играет белыми
         PlayerLock.GameLock = false;
         StartGame();
     }

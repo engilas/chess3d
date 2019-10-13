@@ -1,4 +1,4 @@
-﻿using Assets.Scripts;
+using Assets.Scripts;
 using System.Collections;
 using ChessEngine.Engine;
 
@@ -52,5 +52,10 @@ public class AiStrategy : IChessStrategy
         }
 
         PlayerLock.GameLock = false;
+    }
+
+    public bool IsGameOverControl()
+    {
+        return false;
     }
 }

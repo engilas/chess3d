@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using ChessEngine.Engine;
@@ -90,9 +90,9 @@ public class OnlineManager
 
     private static void StartGameNotification(Command.SessionStartNotify notification)
     {
-        _matched = true;
         PlayerColor = EngineMappers.toEngineColor.Invoke(notification.Color);
         Settings.InitialCameraSide = PlayerColor;
+        _matched = true;
     }
 
     private static void EndGameNotification(Command.EndGameNotify notification)
