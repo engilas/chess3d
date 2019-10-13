@@ -17,6 +17,8 @@ public class OnlineManager
 
     public static void Connect()
     {
+        _matched = false;
+        _connectedTask = null;
         var handler = ChessConnection.notificationHandlerAdapter(ChatNotification, MoveNotification, EndGameNotification, StartGameNotification, SessionCloseNotification);
         var ip = Settings.ServerIp.TrimEnd('/');
         _serverConnection =
