@@ -1,7 +1,6 @@
 ﻿using System;
 using ChessEngine.Engine;
 using Microsoft.FSharp.Core;
-using Newtonsoft.Json;
 using Types;
 using UnityEngine;
 
@@ -79,7 +78,7 @@ public class OnlineMpStrategy : IChessStrategy
         }
         else
         {
-            Debug.LogError("Invalid move from server: " + JsonConvert.SerializeObject(move));
+            Debug.LogError("Invalid move from server: " + FSharp.Json.Json.serialize(move));
         }
     }
 
