@@ -77,11 +77,12 @@ public class UIManager : MonoBehaviour
 
     public void ExitMenuClick()
     {
-        SetupConfirm("Quit", () =>
-        {
-            OnExitClick?.Invoke();
-            SceneManager.LoadScene("Menu");
-        });
+        SetupConfirm("Quit", ExitAction);
+    }
+
+    public void ExitGameOverClick()
+    {
+        ExitAction();
     }
 
     public void ConfirmClick()
@@ -130,5 +131,11 @@ public class UIManager : MonoBehaviour
         confirmPanel.SetActive(true);
         confirmDesc.text = $"{title} the game?";
         _confirmAction = confirmAction;
+    }
+
+    private void ExitAction()
+    {
+        OnExitClick?.Invoke();
+        SceneManager.LoadScene("Menu");
     }
 }
