@@ -68,17 +68,17 @@ namespace Assets.Scripts
 
         public void RestartClick()
         {
-            SetupConfirm("Restart", () =>
-            {
-                ResetUi();
-                PlayerLock.MenuLock = false;
-                OnRestartClick?.Invoke();
-            });
+            SetupConfirm("Restart", RestartAction);
         }
 
         public void ExitMenuClick()
         {
             SetupConfirm("Quit", ExitAction);
+        }
+
+        public void RestartGameOverClick()
+        {
+            RestartAction();
         }
 
         public void ExitGameOverClick()
@@ -138,6 +138,13 @@ namespace Assets.Scripts
         {
             OnExitClick?.Invoke();
             SceneManager.LoadScene("Menu");
+        }
+
+        private void RestartAction()
+        {
+            ResetUi();
+            PlayerLock.MenuLock = false;
+            OnRestartClick?.Invoke();
         }
     }
 }
