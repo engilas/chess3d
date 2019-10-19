@@ -1,23 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-public static class ChessStrategyFactory
+namespace Assets.Scripts.Strategy
 {
-    public static IChessStrategy ResolveStrategy()
+    public static class ChessStrategyFactory
     {
-        switch (Settings.GameMode)
+        public static IChessStrategy ResolveStrategy()
         {
-            case GameMode.OfflineAi:
-                return new AiStrategy();
-            case GameMode.OfflineMp:
-                return new OfflineMpStrategy();
-            case GameMode.OnlineQuick:
-                return new OnlineMpStrategy();
-            default:
-                throw new NotImplementedException();
+            switch (Settings.GameMode)
+            {
+                case GameMode.OfflineAi:
+                    return new AiStrategy();
+                case GameMode.OfflineMp:
+                    return new OfflineMpStrategy();
+                case GameMode.OnlineQuick:
+                    return new OnlineMpStrategy();
+                default:
+                    throw new NotImplementedException();
+            }
         }
     }
 }

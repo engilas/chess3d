@@ -2,11 +2,14 @@
 using ChessEngine.Engine;
 using UnityEngine;
 
-public class ChessState
+namespace Assets.Scripts
 {
-    public ChessPieceColor PlayerColor = ChessPieceColor.White;
-    public Engine Engine;
-    public Board Board;
-    public MonoBehaviour MonoBehaviour;
-    public IChessManager ChessManager;
+    public class ChessState
+    {
+        public ChessPieceColor PlayerColor = ChessPieceColor.White;
+        public Engine Engine;
+        public Board Board;
+        public MonoBehaviour MonoBehaviour;
+        public IChessManager ChessManager;
+    }
 }

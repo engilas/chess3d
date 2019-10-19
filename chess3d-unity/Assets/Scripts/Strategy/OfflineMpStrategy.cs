@@ -1,51 +1,53 @@
-﻿using Assets.Scripts;
+﻿using ChessEngine.Engine;
 using UnityEngine;
-using ChessEngine.Engine;
 
-public class OfflineMpStrategy : IChessStrategy
+namespace Assets.Scripts.Strategy
 {
-    private ChessState _chessState;
-    private CameraManager _cameraManager;
+    public class OfflineMpStrategy : IChessStrategy
+    {
+        private ChessState _chessState;
+        private CameraManager _cameraManager;
      
-    public void Init(ChessState state)
-    {
-        _cameraManager = Object.FindObjectOfType<CameraManager>();
-        _chessState = state;
-    }
-
-    public void Move(MoveContent move)
-    {
-        if (_chessState.Engine.CheckEndGame() != null) return;
-
-        //swap active color
-        if (_chessState.PlayerColor == ChessPieceColor.Black)
-            _chessState.PlayerColor = ChessPieceColor.White;
-        else if (_chessState.PlayerColor == ChessPieceColor.White)
-            _chessState.PlayerColor = ChessPieceColor.Black;
-
-        _cameraManager.MoveOtherSide();
-    }
-
-    public void OnDestroy()
-    {
-    }
-
-    public bool IsRestartAllowed()
-    {
-        return true;
-    }
-
-    public void StopGame()
-    {
-        if (_chessState.PlayerColor == ChessPieceColor.Black)
+        public void Init(ChessState state)
         {
-            _cameraManager.MoveOtherSide();
-            _chessState.PlayerColor = ChessPieceColor.White;
+            _cameraManager = Object.FindObjectOfType<CameraManager>();
+            _chessState = state;
         }
-    }
 
-    public bool IsGameOverControl()
-    {
-        return false;
+        public void Move(MoveContent move)
+        {
+            if (_chessState.Engine.CheckEndGame() != null) return;
+
+            //swap active color
+            if (_chessState.PlayerColor == ChessPieceColor.Black)
+                _chessState.PlayerColor = ChessPieceColor.White;
+            else if (_chessState.PlayerColor == ChessPieceColor.White)
+                _chessState.PlayerColor = ChessPieceColor.Black;
+
+            _cameraManager.MoveOtherSide();
+        }
+
+        public void OnDestroy()
+        {
+        }
+
+        public bool IsRestartAllowed()
+        {
+            return true;
+        }
+
+        public void StopGame()
+        {
+            if (_chessState.PlayerColor == ChessPieceColor.Black)
+            {
+                _cameraManager.MoveOtherSide();
+                _chessState.PlayerColor = ChessPieceColor.White;
+            }
+        }
+
+        public bool IsGameOverControl()
+        {
+            return false;
+        }
     }
 }
