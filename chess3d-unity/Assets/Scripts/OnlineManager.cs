@@ -2,8 +2,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using ChessEngine.Engine;
+using ChessServer.Client;
+using ChessServer.Common;
+using ChessServer.Common.Types;
 using Microsoft.FSharp.Core;
-using Types;
 using UnityEngine;
 
 public class OnlineManager

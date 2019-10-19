@@ -1,7 +1,8 @@
 using System;
 using ChessEngine.Engine;
+using ChessServer.Common;
+using ChessServer.Common.Types;
 using Microsoft.FSharp.Core;
-using Types;
 using UnityEngine;
 
 public class OnlineMpStrategy : IChessStrategy

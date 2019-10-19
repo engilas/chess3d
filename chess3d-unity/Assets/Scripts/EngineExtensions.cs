@@ -1,5 +1,8 @@
-﻿using ChessEngine.Engine;
-using UnityEngine;
+﻿using System;
+using ChessEngine.Engine;
+using ChessServer.Common;
+using ChessServer.Common.Types;
+using Microsoft.FSharp.Core;
 
 namespace Assets.Scripts
 {
@@ -7,54 +10,15 @@ namespace Assets.Scripts
     {
         public static string CheckEndGame(this Engine engine)
         {
-            string reason = null;
-            if (engine.StaleMate)
+            var reason = ChessHelper.checkEndGame(engine);
+            if (reason == FSharpOption<Tuple<Command.SessionResult, string>>.None)
             {
-                if (engine.InsufficientMaterial)
-                {
-                    reason = "Draw by insufficient material";
-                }
-                else if (engine.RepeatedMove)
-                {
-                    reason = "Draw by repetition";
-                }
-                else if (engine.FiftyMove)
-                {
-                    reason = "Draw by fifty move rule";
-                }
-                else
-                {
-                    reason = "Stalemate";
-                }
+                return null;
             }
-            else if (engine.GetWhiteMate())
+            else
             {
-                reason = "Black mates";
+                return reason.Value.Item2;
             }
-            else if (engine.GetBlackMate())
-            {
-                reason = "White mates";
-            }
-
-            if (engine.GetBlackCheck())
-            {
-                Debug.Log("Black check");
-            }
-
-            if (engine.GetWhiteCheck())
-            {
-                Debug.Log("White check");
-            }
-
-            return reason;
-            //if (reason != null)
-            //{
-            //    //_chessState.GameOver = true;
-            //    PlayerLock.GameLock = true;
-            //    uiManager.ShowGameOver(reason);
-            //    return true;
-            //}
-            //return false;
         }
     }
 }
