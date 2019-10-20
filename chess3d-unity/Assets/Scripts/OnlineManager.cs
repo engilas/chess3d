@@ -19,8 +19,15 @@ namespace Assets.Scripts
         private static bool _matchFailed;
         private static CancellationTokenSource _connectionCts;
 
+        private static string LastConnectionId
+        {
+            get => PlayerPrefs.GetString(nameof(LastConnectionId));
+            set => PlayerPrefs.SetString(nameof(LastConnectionId), value);
+        }
+
         public static void Connect()
         {
+            IsClosed = false;
             _matched = false;
             _connectedTask = null;
             var handler = ChessConnection.notificationHandlerAdapter(ChatNotification, MoveNotification, EndGameNotification, StartGameNotification, SessionCloseNotification);
@@ -30,6 +37,35 @@ namespace Assets.Scripts
 
             _connectionCts = new CancellationTokenSource();
             _connectedTask = ConnectWorkflow();
+
+            _serverConnection.Reconnecting += e => 
+            {
+                Debug.Log("Reconnecting");
+                IsReconnecting = true;
+                Reconnecting?.Invoke();
+                return Task.CompletedTask;
+            };
+
+            _serverConnection.Reconnected += e =>
+            {
+                Debug.Log("Reconnected");
+                IsReconnecting = false;
+                return TryRestoreConnection();
+            };
+
+            _serverConnection.Closed += e =>
+            {
+                Debug.Log("Closed");
+                IsClosed = true;
+                Closed?.Invoke();
+                return Task.CompletedTask;
+            };
+        }
+
+        public static async void CloseConnection()
+        {
+            await _serverConnection.Close();
+            await _serverConnection.DisposeAsync();
         }
 
         public static void StopConnection()
@@ -75,10 +111,17 @@ namespace Assets.Scripts
         public static event Action<Domain.MoveDescription> OnOpponentMove;
         public static event Action<Command.EndGameNotify> OnEndGame;
         public static event Action<Command.SessionCloseReason> OnSessionClosed;
+        public static event Action Reconnecting;
+        public static event Action Reconnected;
+        public static event Action Closed;
+
+        public static bool IsReconnecting;
+        public static bool IsClosed;
 
         private static async Task ConnectWorkflow()
         {
             await _serverConnection.Connect(_connectionCts.Token);
+            LastConnectionId = _serverConnection.GetConnectionId();
             var matchResponse = await _serverConnection.Match(new Command.MatchOptions(FSharpOption<string>.None));
             _matchFailed = matchResponse.IsErrorResponse;
         }
@@ -107,6 +150,21 @@ namespace Assets.Scripts
         private static void SessionCloseNotification(Command.SessionCloseReason reason)
         {
             OnSessionClosed?.Invoke(reason);
+        }
+
+        private static async Task TryRestoreConnection()
+        {
+            if (LastConnectionId == null) return;
+            var response = await _serverConnection.Restore(LastConnectionId);
+            if (response.IsOkResponse)
+            {
+                Reconnected?.Invoke();
+            }
+            else
+            {
+                Debug.LogError("Restore connection failed");
+                await _serverConnection.Close();
+            }
         }
     }
 }

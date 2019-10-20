@@ -104,7 +104,7 @@ namespace Assets.Scripts.Strategy
             OnlineManager.OnOpponentMove -= OnlineManagerOnOnOpponentMove;
             OnlineManager.OnEndGame -= OnlineManagerOnEndGame;
             OnlineManager.OnSessionClosed -= OnlineManagerOnSessionClosed;
-            OnlineManager.StopConnection();
+            OnlineManager.CloseConnection();
         }
 
         public bool IsRestartAllowed()

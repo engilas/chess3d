@@ -53,6 +53,8 @@ namespace Assets.Scripts.Strategy
             }
 
             PlayerLock.GameLock = false;
+
+            _chessState.TryStopByEndGame();
         }
 
         public bool IsGameOverControl()

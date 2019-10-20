@@ -139,7 +139,7 @@ namespace Assets.Scripts
             _engine.NewGame();
             _engine.PlyDepthSearched = (byte) Settings.Difficulty;
             _allPieces = BoardLoader.FillBoard(_engine);
-            _chessState.Board = new Board(_allPieces);
+            _chessState.Board = new BoardManager(_allPieces);
             PlayerLock.MenuLock = false;
         }
 

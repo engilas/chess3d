@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ChessEngine.Engine;
 
 namespace Assets.Scripts.Models
 {
-    public class Board
+    public class BoardManager
     {
         private Piece[] _board = new Piece[64];
         private int _blackTaken = 0;
         private int _whiteTaken = 0;
 
-        public Board(IEnumerable<Piece> pieces)
+        public BoardManager(IEnumerable<Piece> pieces)
         {
             foreach (var piece in pieces)
             {

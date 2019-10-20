@@ -8,8 +8,16 @@ namespace Assets.Scripts
     {
         public ChessPieceColor PlayerColor = ChessPieceColor.White;
         public Engine Engine;
-        public Board Board;
+        public BoardManager Board;
         public MonoBehaviour MonoBehaviour;
         public IChessManager ChessManager;
+        public void TryStopByEndGame()
+        {
+            var endGameReason = Engine.CheckEndGame();
+            if (endGameReason != null)
+            {
+                ChessManager.StopGame(endGameReason);
+            }
+        }
     }
 }
